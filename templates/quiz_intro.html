@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% set page_title = "Quiz" %}
+{% set nav_progress = 100 %}
+{% set nav_label = "Lessons Complete" %}
+{% block content %}
+<div class="ready-page">
+  <div class="ready-glow"></div>
+  <div class="ready-card pop-in">
+    <div class="ready-icon">⚡</div>
+    <h1 class="ready-title">Quiz Time</h1>
+    <p class="ready-sub">5 questions · Instant feedback · Score tracking</p>
+
+    <div class="ready-chips">
+      {% for t in ['M&A Advisory','IPO Process','Team Structure','Deal Flow'] %}
+      <span class="rc-chip">✓ {{ t }}</span>
+      {% endfor %}
+    </div>
+
+    <div class="mode-select mt-4">
+      <div class="mode-label">SELECT DIFFICULTY</div>
+      <div class="mode-grid">
+        <div class="mode-card mc-active" id="mode-normal" onclick="setMode('normal')">
+          <div class="mc-inner">
+            <div class="mc-icon">🎯</div>
+            <div class="mc-title">Normal</div>
+            <div class="mc-sub">45s per question<br>Hints allowed</div>
+          </div>
+        </div>
+        <div class="mode-card" id="mode-hard" onclick="setMode('hard')">
+          <div class="mc-inner">
+            <div class="mc-icon">🔥</div>
+            <div class="mc-title">Hard</div>
+            <div class="mc-sub">20s per question<br>No hints</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kb-hint mt-3">
+      <kbd>A</kbd> <kbd>B</kbd> <kbd>C</kbd> <kbd>D</kbd> to select &nbsp;·&nbsp; <kbd>Enter</kbd> to submit
+    </div>
+
+    <a href="/quiz/1?mode=normal" class="cta-btn cta-btn-gold mt-4" id="startBtn">
+      Start Quiz →
+    </a>
+  </div>
+</div>
+
+<script>
+var selectedMode = 'normal';
+function setMode(m) {
+  selectedMode = m;
+  document.getElementById('mode-normal').className = 'mode-card' + (m==='normal' ? ' mc-active' : '');
+  document.getElementById('mode-hard').className   = 'mode-card' + (m==='hard'   ? ' mc-active' : '');
+  document.getElementById('startBtn').href = '/quiz/1?mode=' + m;
+}
+</script>
+{% endblock %}

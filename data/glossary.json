@@ -1,0 +1,22 @@
+{
+  "Investment Bank": "A financial institution that helps companies raise capital and advises on major transactions like M&A and IPOs. NOT the same as a retail or commercial bank.",
+  "M&A": "Mergers and Acquisitions. A merger is when two companies combine into one. An acquisition is when one company purchases another.",
+  "Buy-Side": "In M&A advisory, the bank advising the company that wants to BUY (acquire) another company.",
+  "Sell-Side": "In M&A advisory, the bank advising the company that is being SOLD or wants to find a buyer.",
+  "IPO": "Initial Public Offering. The first time a private company sells shares to the public on a stock exchange. The investment bank manages this entire process.",
+  "Underwriting": "When an investment bank agrees to buy all shares from a company at the IPO price and then resells them to investors. The bank takes on the risk.",
+  "Spread": "The underwriting fee — typically 3–7% of total IPO proceeds — that the bank earns for taking on the underwriting risk.",
+  "Due Diligence": "Deep analysis of a target company's financials, legal situation, risks, and operations before a deal closes.",
+  "Pitch Book": "A presentation deck created by investment bankers to pitch their services to potential clients or to pitch a deal to potential buyers.",
+  "Analyst": "The most junior banker. Responsible for building financial models, updating pitch books, and pulling comparable company data.",
+  "Associate": "Mid-level banker who reviews and refines models, writes memos, and bridges the gap between Analysts and VPs.",
+  "Vice President (VP)": "Senior banker who manages deal execution day-to-day, oversees timelines, and handles client communication.",
+  "Managing Director (MD)": "The most senior deal team member. Responsible for bringing in new clients and closing deals.",
+  "Capital Markets": "One of the two main IB functions. Helps companies raise money through equity offerings (like IPOs) or debt (bonds).",
+  "Advisory": "One of the two main IB functions. Providing strategic advice on mergers, acquisitions, and other major financial transactions.",
+  "Roadshow": "Before an IPO, the company and its bankers tour major cities to pitch the investment to institutional investors.",
+  "Book Building": "The process of collecting buy orders from investors to determine the final IPO price range.",
+  "Mandate": "When a company formally hires an investment bank to advise on or execute a deal.",
+  "Tombstone": "An advertisement placed by investment banks announcing a completed deal. Named for their rectangular, grave-marker appearance.",
+  "Chinese Wall": "An information barrier within a bank that prevents the flow of information between different departments (e.g., M&A and trading)."
+}

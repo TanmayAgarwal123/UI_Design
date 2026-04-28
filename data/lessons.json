@@ -1,0 +1,264 @@
+[
+  {
+    "id": 1,
+    "type": "info",
+    "title": "What is Investment Banking?",
+    "progress": "1 / 11",
+    "body": "Investment banks help companies and governments raise money and provide advice on major financial transactions like mergers, acquisitions, and IPOs.",
+    "callout": "Think of an investment bank as a financial advisor for big companies — not for individuals.",
+    "banks": [
+      { "name": "Goldman Sachs", "url": "https://www.goldmansachs.com" },
+      { "name": "J.P. Morgan",   "url": "https://www.jpmorgan.com" },
+      { "name": "Morgan Stanley","url": "https://www.morganstanley.com" },
+      { "name": "Evercore",      "url": "https://www.evercore.com" },
+      { "name": "Jefferies",     "url": "https://www.jefferies.com" }
+    ],
+    "next": 2
+  },
+  {
+    "id": 2,
+    "type": "two_col",
+    "title": "Function 1: Advisory (M&A)",
+    "progress": "2 / 11",
+    "left": {
+      "heading": "Buy-Side",
+      "color": "blue",
+      "body": "The bank advises a company that wants to BUY another company.",
+      "example": "Example: Disney buying Pixar — an investment bank helped Disney decide the right price and structure.",
+      "quote": "\"SpaceX was the Buy-Side on their acquisition of XAI\""
+    },
+    "right": {
+      "heading": "Sell-Side",
+      "color": "orange",
+      "body": "The bank advises a company that is being SOLD or is looking for a buyer.",
+      "example": "Example: LinkedIn selling to Microsoft — LinkedIn's bank helped find the best deal.",
+      "quote": "\"XAI was on the Sell-Side of the transaction\""
+    },
+    "next": 3
+  },
+  {
+    "id": 3,
+    "type": "interactive_sort",
+    "title": "Interactive: M&A Scenario Sorter",
+    "progress": "3 / 11",
+    "subtitle": "SCENARIO SORTER",
+    "instruction": "For each deal below, decide which side the <strong>bold company's</strong> bank was on — Buy-Side or Sell-Side?",
+    "deals": [
+      {"id": "d1", "text": "<strong>MICROSOFT</strong> acquires Activision Blizzard for $69B"},
+      {"id": "d2", "text": "<strong>LINKEDIN</strong> is purchased by Microsoft for $26B"},
+      {"id": "d3", "text": "<strong>DISNEY</strong> buys Pixar Animation Studios for $7.4B"},
+      {"id": "d4", "text": "<strong>WARNER BROS.</strong> sells its music division to Access Industries"}
+    ],
+    "answers": {
+      "d1": "buy",
+      "d2": "sell",
+      "d3": "buy",
+      "d4": "sell"
+    },
+    "next": 4
+  },
+  {
+    "id": 4,
+    "type": "answers_reveal",
+    "title": "M&A Scenario — Answers",
+    "progress": "3 / 11",
+    "buy_side": [
+      "MICROSOFT acquires Activision — Microsoft is the buyer",
+      "DISNEY buys Pixar — Disney is the acquirer"
+    ],
+    "sell_side": [
+      "LINKEDIN sells to Microsoft — LinkedIn's bank finds the best deal",
+      "WARNER BROS. sells its music division — WB is the seller"
+    ],
+    "key_insight": "The same company can be on different sides in different deals. Ask: are they gaining or giving up ownership? Gaining → Buy-Side. Giving up → Sell-Side.",
+    "next": 5
+  },
+  {
+    "id": 5,
+    "type": "ipo_overview",
+    "title": "Function 2: Capital Markets (IPO)",
+    "progress": "4 / 11",
+    "instruction": "Click each step card to learn what happens at that stage.",
+    "subtitle": "Tap any card below to reveal details about that stage of the IPO.",
+    "steps": [
+      {"num": 1, "label": "Company needs $$$", "link": 6},
+      {"num": 2, "label": "Bank sets the price", "link": 7},
+      {"num": 3, "label": "Bank sells shares", "link": 8},
+      {"num": 4, "label": "Company is now public", "link": 9}
+    ],
+    "next": 10
+  },
+  {
+    "id": 6,
+    "type": "step_detail",
+    "title": "IPO Step 1: Company Needs $$$",
+    "step_num": 1,
+    "step_title": "The Company Needs Capital",
+    "body": "A private company decides it needs to raise a large amount of money.",
+    "rows": [
+      {"term": "Fund Growth", "desc": "Expand into new markets, hire, build products"},
+      {"term": "Pay Off Debt", "desc": "Replace expensive debt with equity capital"},
+      {"term": "Cash Out Early Investors", "desc": "VCs and founders want liquidity"}
+    ],
+    "key_point": "The company hires an investment bank to manage the IPO process.",
+    "key_point_color": "blue",
+    "back_to": 5,
+    "next": 7
+  },
+  {
+    "id": 7,
+    "type": "step_detail",
+    "title": "IPO Step 2: Bank Sets the Price",
+    "step_num": 2,
+    "step_title": "The Bank Prices the Shares",
+    "body": "The investment bank (underwriter) determines how much each share should cost.",
+    "rows": [
+      {"term": "Valuation Analysis", "desc": "DCF, comparable companies, and precedent transactions to estimate the company's worth"},
+      {"term": "Roadshow", "desc": "Company and bankers tour institutional investors to pitch the stock and gauge demand"},
+      {"term": "Book Building", "desc": "Collect buy orders from investors to determine the final price range"}
+    ],
+    "key_point": "The final IPO price balances company valuation with investor demand.",
+    "key_point_color": "blue",
+    "back_to": 5,
+    "next": 8
+  },
+  {
+    "id": 8,
+    "type": "step_detail_flow",
+    "title": "IPO Step 3: Bank Sells Shares",
+    "step_num": 3,
+    "step_title": "The Bank Sells the Shares",
+    "body": "On pricing night, the bank commits to buying all the shares from the company at the IPO price. Then it sells (allocates) them to investors. This is called underwriting.",
+    "flow": [
+      {"label": "Company", "sub": "Sells shares to bank at IPO price", "highlight": false},
+      {"label": "Investment Bank (Underwriter)", "sub": "", "highlight": true},
+      {"label": "Institutional Investors", "sub": "", "highlight": false}
+    ],
+    "callout": "The bank takes on risk — if they can't sell the shares, they're stuck holding them. That's why the bank earns a fee (the \"spread\") of ~3–7% of total proceeds.",
+    "back_to": 5,
+    "next": 9
+  },
+  {
+    "id": 9,
+    "type": "step_detail",
+    "title": "IPO Step 4: Company Is Now Public",
+    "step_num": 4,
+    "step_title": "The Company Is Now Public",
+    "body": "On the first trading day, the company's shares begin trading on a stock exchange (NYSE or NASDAQ). Anyone can now buy and sell the stock.",
+    "rows": [
+      {"term": "Public Reporting", "desc": "Must file 10-K, 10-Q, and disclose financials to the SEC"},
+      {"term": "Market Valuation", "desc": "Stock price now determines the company's market cap in real time"},
+      {"term": "Liquidity", "desc": "Founders, employees, and VCs can eventually sell their shares"}
+    ],
+    "key_point": "The IPO is complete. The bank's job is done (except for a stabilization period).",
+    "key_point_color": "green",
+    "back_to": 5,
+    "next": 10
+  },
+  {
+    "id": 10,
+    "type": "interactive_sequence",
+    "title": "Interactive: Sequence the IPO Steps",
+    "progress": "5 / 11",
+    "subtitle": "SEQUENCE THE STEPS",
+    "instruction": "The 4 IPO steps below are shuffled. Use the dropdowns to assign each step a position (1 = first, 4 = last).",
+    "steps": [
+      {"id": "s_sell",   "label": "Bank Sells Shares",     "desc": "Underwriting — bank buys all shares then allocates to investors"},
+      {"id": "s_needs",  "label": "Company Needs $$$",     "desc": "A private company decides to raise capital and hires a bank"},
+      {"id": "s_public", "label": "Company Is Now Public", "desc": "Shares begin trading on NYSE or NASDAQ; anyone can buy"},
+      {"id": "s_price",  "label": "Bank Sets the Price",   "desc": "Valuation analysis, roadshow, and book building to find the right price"}
+    ],
+    "correct_order": ["s_needs", "s_price", "s_sell", "s_public"],
+    "next": 11
+  },
+  {
+    "id": 11,
+    "type": "sequence_answer",
+    "title": "IPO Sequence — Correct Order",
+    "progress": "5 / 11",
+    "steps": [
+      {"num": 1, "label": "Company Needs $$$",     "desc": "Hires a bank to manage the IPO process"},
+      {"num": 2, "label": "Bank Sets the Price",   "desc": "DCF, roadshow & book building"},
+      {"num": 3, "label": "Bank Sells Shares",     "desc": "Underwriting — bank takes on the risk"},
+      {"num": 4, "label": "Company Is Now Public", "desc": "Shares trade on NYSE or NASDAQ"}
+    ],
+    "key_insight": "You can't price what you don't have, you can't sell what isn't priced, and you can't go public until the shares are sold. Each step only works because the one before it happened!",
+    "next": 12
+  },
+  {
+    "id": 12,
+    "type": "org_chart",
+    "title": "Who Works in Investment Banking?",
+    "progress": "6 / 11",
+    "roles": [
+      {"title": "Managing Director (MD)", "desc": "Brings in clients, closes deals",             "years": "15+ yrs", "level": 1},
+      {"title": "Vice President (VP)",    "desc": "Manages deal execution day-to-day",           "years": "7–10 yrs","level": 2},
+      {"title": "Associate",             "desc": "Builds models, writes memos",                 "years": "3–5 yrs", "level": 3},
+      {"title": "Analyst",               "desc": "Entry level — builds models and pitch books", "years": "0–2 yrs", "level": 4}
+    ],
+    "next": 13
+  },
+  {
+    "id": 13,
+    "type": "interactive_match",
+    "title": "Who Does What?",
+    "progress": "7 / 11",
+    "instruction": "Match each description on the right to the correct IB role on the left.",
+    "roles": ["Analyst", "Associate", "Vice President", "Managing Director"],
+    "descriptions": [
+      {"id": "desc_a", "text": "Brings in new clients, wins mandates, and maintains senior relationships"},
+      {"id": "desc_b", "text": "Entry-level: builds models, creates pitch books, pulls comps until 2 AM"},
+      {"id": "desc_c", "text": "Runs deal execution day-to-day, manages timelines and client communication"},
+      {"id": "desc_d", "text": "Reviews and refines models, drafts memos, bridges analysts and VPs"}
+    ],
+    "answers": {
+      "Analyst": "desc_b",
+      "Associate": "desc_d",
+      "Vice President": "desc_c",
+      "Managing Director": "desc_a"
+    },
+    "next": 14
+  },
+  {
+    "id": 14,
+    "type": "process",
+    "title": "How a Deal Gets Done",
+    "progress": "8 / 11",
+    "steps": [
+      {"num": 1, "label": "Pitch",          "desc": "Bank creates a pitch book to win the client's business"},
+      {"num": 2, "label": "Due Diligence",  "desc": "Deep analysis of financials, risks, and valuation"},
+      {"num": 3, "label": "Negotiation",    "desc": "Structuring deal terms between buyer and seller"},
+      {"num": 4, "label": "Execution",      "desc": "Finalizing documents, regulatory approvals, closing"}
+    ],
+    "next": 15
+  },
+  {
+    "id": 15,
+    "type": "interactive_deal",
+    "title": "Build the Deal Timeline",
+    "progress": "9 / 11",
+    "instruction": "The 4 deal stages below are shuffled. Use the dropdowns to assign each stage a position (1 = first, 4 = last).",
+    "stages": [
+      {"id": "neg",   "label": "Negotiation",   "desc": "Structuring terms between buyer & seller"},
+      {"id": "pitch", "label": "Pitch",          "desc": "Creating materials to win the client"},
+      {"id": "exec",  "label": "Execution",      "desc": "Approvals, docs, and closing the deal"},
+      {"id": "dd",    "label": "Due Diligence",  "desc": "Deep dive into financials & risks"}
+    ],
+    "correct_order": ["pitch", "dd", "neg", "exec"],
+    "next": 16
+  },
+  {
+    "id": 16,
+    "type": "takeaways",
+    "title": "Key Takeaways",
+    "progress": "10 / 11",
+    "points": [
+      "IB helps companies with major financial transactions — not personal banking",
+      "Advisory (M&A): Advising on buying or selling companies (Buy-Side vs. Sell-Side)",
+      "Capital Markets: Helping companies raise money through IPOs",
+      "IPO process: Company needs $$$ → Bank prices → Bank sells → Company goes public",
+      "Deal flow: Pitch → Due Diligence → Negotiation → Execution"
+    ],
+    "next": "quiz"
+  }
+]

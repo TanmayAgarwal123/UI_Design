@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+{% set page_title = "Question " ~ q_num %}
+{% set nav_progress = (q_num / total * 100)|int %}
+{% set nav_label = "Q" ~ q_num ~ " / " ~ total %}
+{% block content %}
+<div class="quiz-page">
+
+  {% if streak >= 2 %}
+  <div class="streak-bar pop-in" style="--d:0ms">
+    🔥 {{ streak }} correct in a row!
+    {% if streak >= best_streak and streak >= 3 %}<span class="streak-best">Personal best!</span>{% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Step dots -->
+  <div class="qp-dots">
+    {% for i in range(1, total+1) %}
+    <div class="qp-dot {% if i < q_num %}qd-done{% elif i == q_num %}qd-curr{% endif %}"></div>
+    {% endfor %}
+  </div>
+
+  <div class="quiz-card {% if feedback and not feedback.is_correct and not feedback.timed_out %}shake{% endif %}">
+
+    <!-- Timer (only when answering) -->
+    {% if not feedback %}
+    <div class="q-timer-wrap" id="timerWrap">
+      <svg class="q-timer-svg" width="52" height="52" viewBox="0 0 36 36">
+        <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="2.5"/>
+        <circle id="timerRing" cx="18" cy="18" r="15.9" fill="none"
+          stroke="#4F8EF7" stroke-width="2.5"
+          stroke-dasharray="100 100" stroke-dashoffset="0"
+          transform="rotate(-90 18 18)" stroke-linecap="round"/>
+      </svg>
+      <span class="q-timer-num" id="timerNum">{{ timer_seconds }}</span>
+    </div>
+    {% endif %}
+
+    <div class="qc-header">
+      <span class="qc-eye">Question {{ q_num }} of {{ total }}</span>
+      {% if mode == 'hard' %}<span class="qc-mode-badge">🔥 Hard Mode</span>{% endif %}
+    </div>
+
+    <div class="qc-num-bg">{{ '%02d'|format(q_num) }}</div>
+    <h2 class="qc-question">{{ question.question }}</h2>
+
+    {% if not feedback %}
+    <!-- ══ ANSWER SELECTION ══ -->
+    <form method="POST" action="/quiz/{{ q_num }}?mode={{ mode }}" id="qform">
+      <input type="hidden" name="action" value="answer">
+      <input type="hidden" name="timed_out" id="timedOutInput" value="0">
+
+      <div class="qc-opts">
+        {% for key, text in question.options.items() %}
+        <label class="qc-opt" data-key="{{ key }}" id="opt{{ key }}">
+          <input type="radio" name="answer" value="{{ key }}" class="qr">
+          <span class="qo-key" id="key{{ key }}">{{ key }}</span>
+          <span class="qo-text">{{ text }}</span>
+        </label>
+        {% endfor %}
+      </div>
+
+      {% if mode != 'hard' %}
+      <div class="hint-area" id="hintArea">
+        <button type="button" class="hint-btn" id="hintBtn"
+          {% if q_num in hints_used %}disabled{% endif %}>
+          💡 {% if q_num in hints_used %}Hint used{% else %}Need a hint?{% endif %}
+        </button>
+        <div class="hint-text" id="hintText"></div>
+      </div>
+      {% endif %}
+
+      <div class="qc-actions">
+        {% if q_num > 1 %}
+          <a href="/quiz/{{ q_num - 1 }}?mode={{ mode }}" class="btn-ghost">← Back</a>
+        {% else %}
+          <a href="/quiz" class="btn-ghost">← Back</a>
+        {% endif %}
+        <!-- NOTE: NOT disabled — user just gets a validation message if nothing selected -->
+        <button type="submit" class="cta-btn" id="qsubmit">Submit Answer</button>
+      </div>
+    </form>
+
+    {% else %}
+    <!-- ══ FEEDBACK ══ -->
+    {% if timed_out %}
+    <div class="q-feedback qcf-timeout pop-in" style="--d:0ms">
+      <div class="qcf-icon">⏰</div>
+      <div><div class="qcf-verdict">Time's up!</div><div class="qcf-chosen">No answer submitted in time.</div></div>
+    </div>
+    {% elif feedback.is_correct %}
+    <div class="q-feedback qcf-ok pop-in" style="--d:0ms">
+      <div class="qcf-icon">✓</div>
+      <div>
+        <div class="qcf-verdict">Correct!{% if streak >= 2 %} 🔥 {{ streak }}-streak{% endif %}</div>
+        <div class="qcf-chosen">{{ feedback.chosen }} — {{ question.options.get(feedback.chosen, '—') }}</div>
+      </div>
+    </div>
+    {% else %}
+    <div class="q-feedback qcf-err pop-in" style="--d:0ms">
+      <div class="qcf-icon">✗</div>
+      <div>
+        <div class="qcf-verdict">Not quite</div>
+        <div class="qcf-chosen">You chose {{ feedback.chosen }} — {{ question.options.get(feedback.chosen, '—') }}</div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Locked options showing correct/wrong -->
+    <div class="qc-opts qc-opts-locked">
+      {% for key, text in question.options.items() %}
+      <div class="qc-opt qco-static
+        {% if key == feedback.correct %}qco-correct
+        {% elif key == feedback.chosen and not feedback.is_correct %}qco-wrong
+        {% else %}qco-dim{% endif %}">
+        <span class="qo-key
+          {% if key == feedback.correct %}qok-good
+          {% elif key == feedback.chosen and not feedback.is_correct %}qok-bad{% endif %}">
+          {% if key == feedback.correct %}✓
+          {% elif key == feedback.chosen and not feedback.is_correct %}✗
+          {% else %}{{ key }}{% endif %}
+        </span>
+        <span class="qo-text">{{ text }}</span>
+        {% if key == feedback.correct and not feedback.is_correct %}
+          <span class="correct-flag">Correct answer</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Explanation -->
+    <div class="qc-expl pop-in" style="--d:120ms">
+      <div class="qe-label">{% if feedback.is_correct %}Why you're right{% else %}Explanation{% endif %}</div>
+      <p>{{ feedback.explanation }}</p>
+    </div>
+
+    <!-- Next button -->
+    <form method="POST" action="/quiz/{{ q_num }}?mode={{ mode }}" id="nextForm">
+      <input type="hidden" name="action" value="next">
+      <div class="qc-actions" style="justify-content:space-between">
+        <span class="kb-shortcut-hint">Press <kbd>Space</kbd> or <kbd>Enter</kbd> to continue</span>
+        <button type="submit" class="cta-btn" id="nextBtn">
+          {% if q_num < total %}Next Question →{% else %}See Results →{% endif %}
+        </button>
+      </div>
+    </form>
+
+    {% endif %}
+  </div>
+
+  <div class="q-progress-label">
+    Question {{ q_num }} of {{ total }} ·
+    {% if mode == 'hard' %}Hard Mode{% else %}Normal Mode{% endif %}
+    {% if hints_used|length > 0 %} · {{ hints_used|length }} hint{{ 's' if hints_used|length != 1 else '' }} used{% endif %}
+  </div>
+</div>
+
+<!-- Confetti container -->
+<div id="confettiWrap" style="position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── Config from server ───────────────────────────────────────────────
+var Q_NUM         = {{ q_num }};
+var TOTAL         = {{ total }};
+var MODE          = '{{ mode }}';
+var TIMER_SECONDS = {{ timer_seconds }};
+var HAS_FEEDBACK  = {{ 'true' if feedback else 'false' }};
+var IS_CORRECT    = {{ 'true' if feedback and feedback.is_correct else 'false' }};
+var TIMED_OUT     = {{ 'true' if timed_out else 'false' }};
+
+// ── Timer (only on answer screen) ───────────────────────────────────
+var timerInterval = null;
+var timerRunning  = false;
+
+function startTimer() {
+  if (HAS_FEEDBACK) return; // never run timer on feedback screen
+  var remaining = TIMER_SECONDS;
+  var ring   = document.getElementById('timerRing');
+  var numEl  = document.getElementById('timerNum');
+  if (!ring || !numEl) return;
+
+  timerRunning = true;
+  timerInterval = setInterval(function() {
+    remaining -= 1;
+    numEl.textContent = remaining;
+    var offset = 100 * (1 - remaining / TIMER_SECONDS);
+    ring.setAttribute('stroke-dashoffset', offset.toFixed(2));
+
+    if (remaining <= 10) ring.style.stroke = '#F87171';
+    if (remaining <= 5)  { ring.style.stroke = '#F43F5E'; numEl.style.color = '#F43F5E'; }
+
+    if (remaining <= 0) {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      document.getElementById('timedOutInput').value = '1';
+      document.getElementById('qform').submit();
+    }
+  }, 1000);
+}
+
+// Pause timer when tab hidden
+document.addEventListener('visibilitychange', function() {
+  if (document.hidden && timerRunning) {
+    clearInterval(timerInterval);
+  } else if (!document.hidden && !HAS_FEEDBACK && timerRunning === false) {
+    // don't auto-resume — user must have come back, just let them finish
+  }
+});
+
+// ── Option click ─────────────────────────────────────────────────────
+var selectedAnswer = null;
+
+document.querySelectorAll('.qc-opt:not(.qco-static)').forEach(function(opt) {
+  opt.addEventListener('click', function() {
+    selectedAnswer = this.dataset.key;
+    document.querySelectorAll('.qc-opt').forEach(function(o) {
+      o.classList.remove('qco-selected');
+    });
+    this.classList.add('qco-selected');
+    this.querySelector('.qr').checked = true;
+
+    // Bounce key badge
+    var keyEl = this.querySelector('.qo-key');
+    keyEl.style.transform = 'scale(1.25)';
+    setTimeout(function() { keyEl.style.transform = ''; }, 200);
+  });
+});
+
+// ── Form submit guard ────────────────────────────────────────────────
+var qform = document.getElementById('qform');
+if (qform) {
+  qform.addEventListener('submit', function(e) {
+    // If nothing selected AND not timed out, prevent & show message
+    if (!selectedAnswer && document.getElementById('timedOutInput').value !== '1') {
+      e.preventDefault();
+      var btn = document.getElementById('qsubmit');
+      var orig = btn.textContent;
+      btn.textContent = 'Please pick an answer first!';
+      btn.style.background = 'linear-gradient(135deg,#F87171,#DC2626)';
+      setTimeout(function() {
+        btn.textContent = orig;
+        btn.style.background = '';
+      }, 1800);
+      return;
+    }
+    // Stop timer on submit
+    clearInterval(timerInterval);
+  });
+}
+
+// ── Keyboard shortcuts ───────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+  if (!HAS_FEEDBACK) {
+    // A/B/C/D or 1/2/3/4 to pick an option
+    var keyMap = { a:'A', b:'B', c:'C', d:'D', '1':'A', '2':'B', '3':'C', '4':'D' };
+    var pick = keyMap[e.key.toLowerCase()];
+    if (pick) {
+      var opt = document.querySelector('.qc-opt[data-key="' + pick + '"]');
+      if (opt) {
+        opt.click();
+        showKbToast(pick);
+      }
+    }
+    // Enter to submit (if answer selected)
+    if (e.key === 'Enter' && selectedAnswer) {
+      e.preventDefault();
+      clearInterval(timerInterval);
+      qform.submit();
+    }
+  } else {
+    // Space or Enter to go to next
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      var nextForm = document.getElementById('nextForm');
+      if (nextForm) nextForm.submit();
+    }
+  }
+});
+
+function showKbToast(key) {
+  var t = document.getElementById('kbToast');
+  if (!t) return;
+  t.textContent = key;
+  t.classList.add('kb-show');
+  setTimeout(function() { t.classList.remove('kb-show'); }, 700);
+}
+
+// ── Hint button ──────────────────────────────────────────────────────
+var hintBtn = document.getElementById('hintBtn');
+if (hintBtn) {
+  hintBtn.addEventListener('click', function() {
+    // Pause timer while reading hint
+    clearInterval(timerInterval);
+    timerRunning = false;
+
+    fetch('/quiz/' + Q_NUM + '?mode=' + MODE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'action=hint'
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      var hintText = document.getElementById('hintText');
+      hintText.textContent = '💡 ' + d.hint;
+      hintText.style.display = 'block';
+      hintBtn.disabled = true;
+      hintBtn.textContent = '💡 Hint used';
+    })
+    .catch(function() {
+      // Hint failed silently — no crash
+    });
+  });
+}
+
+// ── Confetti on correct ──────────────────────────────────────────────
+if (HAS_FEEDBACK && IS_CORRECT && !TIMED_OUT) {
+  (function() {
+    var wrap = document.getElementById('confettiWrap');
+    var colors = ['#4F8EF7','#F0A500','#34D399','#A78BFA','#F87171'];
+    for (var i = 0; i < 45; i++) {
+      (function(i) {
+        var p = document.createElement('div');
+        p.style.cssText = 'position:absolute;top:-10px;' +
+          'left:' + (Math.random()*100) + '%;' +
+          'width:' + (5+Math.random()*7) + 'px;' +
+          'height:' + (5+Math.random()*7) + 'px;' +
+          'background:' + colors[i%colors.length] + ';' +
+          'border-radius:' + (Math.random()>.5?'50%':'2px') + ';' +
+          'animation:confettiFall ' + (1.8+Math.random()*1.4) + 's linear ' + (Math.random()*1) + 's forwards;';
+        wrap.appendChild(p);
+      })(i);
+    }
+  })();
+}
+
+// ── Start timer on page load ─────────────────────────────────────────
+window.addEventListener('load', function() {
+  if (!HAS_FEEDBACK) {
+    startTimer();
+  }
+});
+</script>
+{% endblock %}

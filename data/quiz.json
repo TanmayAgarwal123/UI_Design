@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "question": "A company wants to acquire a competitor. Which IB function would they hire a bank for?",
+    "options": {"A":"Capital Markets — issue new stock","B":"Advisory (M&A) — Buy-Side","C":"Advisory (M&A) — Sell-Side","D":"Personal banking services"},
+    "correct": "B",
+    "hint": "Think: which company is doing the buying here? The bank represents whoever is GAINING ownership.",
+    "topic": "M&A Advisory",
+    "explanation": "When a company wants to acquire another, they hire an investment bank's M&A advisory team on the buy-side to help with valuation, negotiation, and deal structuring."
+  },
+  {
+    "id": 2,
+    "question": "What does IPO stand for, and what does it accomplish for a company?",
+    "options": {"A":"Internal Profit Operation — restructures divisions","B":"Initial Public Offering — sells shares to the public for the first time","C":"Investor Portfolio Optimization — rebalances portfolios","D":"Institutional Purchase Order — institutions buy assets"},
+    "correct": "B",
+    "hint": "IPO is how a private company becomes publicly traded. Think: the FIRST time regular people can buy shares.",
+    "topic": "Capital Markets",
+    "explanation": "An IPO (Initial Public Offering) is when a private company goes public by selling shares on a stock exchange for the first time. Investment banks manage the entire process."
+  },
+  {
+    "id": 3,
+    "question": "In an IPO, the bank commits to buying all shares at the IPO price then resells them. What is the bank's fee for this risk?",
+    "options": {"A":"A flat monthly consulting retainer","B":"A 'spread' of roughly 3–7% of total IPO proceeds","C":"An equity stake in the newly public company","D":"No fee — they profit by trading the stock afterward"},
+    "correct": "B",
+    "hint": "The bank takes on massive risk by buying ALL shares upfront. Think: what % of $1 billion IPO would be $30–70 million?",
+    "topic": "Capital Markets",
+    "explanation": "The underwriting spread is the bank's fee for taking on the risk of buying all IPO shares and reselling them. On a $1B IPO at 5%, the bank earns ~$50M."
+  },
+  {
+    "id": 4,
+    "question": "A Goldman MD needs a valuation model and pitch book updated overnight. Who does she assign this to?",
+    "options": {"A":"Managing Director — she handles it herself","B":"Vice President — they manage day-to-day execution","C":"Analyst — entry-level role responsible for models & pitch books","D":"Associate — they bridge analysts and VPs"},
+    "correct": "C",
+    "hint": "Who is the most junior member of the team? That person does the most technical grunt work.",
+    "topic": "Team Structure",
+    "explanation": "Analysts are the engine of deal teams — they build financial models, create pitch books, and pull data, often working late into the night."
+  },
+  {
+    "id": 5,
+    "question": "Which is the correct order of the deal process?",
+    "options": {"A":"Due Diligence → Pitch → Execution → Negotiation","B":"Pitch → Due Diligence → Negotiation → Execution","C":"Negotiation → Pitch → Due Diligence → Execution","D":"Execution → Negotiation → Pitch → Due Diligence"},
+    "correct": "B",
+    "hint": "Think logically: before you can analyze, you need a client. Before you can negotiate, you need to understand the deal. Before closing, you negotiate.",
+    "topic": "Deal Process",
+    "explanation": "The bank pitches to win the business, digs into the target (due diligence), negotiates deal terms, then executes and closes."
+  }
+]

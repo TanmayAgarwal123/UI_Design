@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% set page_title = "Results" %}
+{% block content %}
+<div class="results-page">
+  <div id="confettiWrap" style="position:fixed;inset:0;pointer-events:none;z-index:99;overflow:hidden"></div>
+
+  <!-- Score Hero -->
+  <div class="rp-hero pop-in" style="--d:0ms">
+    <div class="rph-emoji">{% if score==total %}🏆{% elif score>=total*0.6 %}🎉{% else %}📚{% endif %}</div>
+    <h1 class="rph-title">{% if score==total %}Perfect Score!{% elif score>=total*0.6 %}Great Job!{% else %}Keep Studying{% endif %}</h1>
+    <p class="rph-sub">{{ attempt.mode|title }} Mode · {{ attempt.date }}</p>
+
+    <div class="rph-ring-wrap">
+      <svg width="180" height="180" viewBox="0 0 120 120">
+        <defs>
+          <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#4F8EF7"/>
+            <stop offset="100%" stop-color="#A78BFA"/>
+          </linearGradient>
+        </defs>
+        <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="7"/>
+        <circle id="scoreRing" cx="60" cy="60" r="50" fill="none" stroke="url(#rg)" stroke-width="7"
+          stroke-dasharray="0 314" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+      </svg>
+      <div class="rph-label">
+        <span class="rpl-num">{{ score }}</span><span class="rpl-of">/{{ total }}</span>
+      </div>
+    </div>
+
+    <div class="rph-bar-row">
+      <div class="rph-bar"><div class="rph-bar-fill" id="scoreBar"></div></div>
+      <span class="rph-pct">{{ (score/total*100)|int }}%</span>
+    </div>
+
+    <!-- Summary badges -->
+    <div class="rph-badges">
+      {% if best_streak >= 2 %}
+      <div class="rph-badge rph-badge-fire">🔥 {{ best_streak }}-streak</div>
+      {% endif %}
+      {% if attempt.hints > 0 %}
+      <div class="rph-badge rph-badge-hint">💡 {{ attempt.hints }} hint{{ 's' if attempt.hints!=1 else '' }}</div>
+      {% endif %}
+      {% if attempt.mode == 'hard' %}
+      <div class="rph-badge rph-badge-hard">🔥 Hard Mode</div>
+      {% endif %}
+      {% if score == total %}
+      <div class="rph-badge rph-badge-perfect">⭐ Perfect</div>
+      {% endif %}
+    </div>
+
+    <!-- Share -->
+    <div class="rph-share">
+      <a href="https://twitter.com/intent/tweet?text=I+scored+{{ score }}/{{ total }}+on+the+IB+Academy+quiz!+%23IBBanking+%23Finance"
+        target="_blank" class="share-btn">Share on X →</a>
+    </div>
+  </div>
+
+  <!-- Topic breakdown chart -->
+  {% if topic_results %}
+  <div class="rp-chart pop-in" style="--d:120ms">
+    <h3 class="rpc-title">Performance by Topic</h3>
+    <div class="rpc-bars">
+      {% for topic, data in topic_results.items() %}
+      {% set pct = (data.correct / data.total * 100)|int %}
+      <div class="rpc-row">
+        <span class="rpc-label">{{ topic }}</span>
+        <div class="rpc-bar-wrap">
+          <div class="rpc-bar-bg">
+            <div class="rpc-bar-fill {% if pct==100 %}rpcb-perfect{% elif pct>=50 %}rpcb-ok{% else %}rpcb-err{% endif %}"
+              data-pct="{{ pct }}" style="width:0%"></div>
+          </div>
+          <span class="rpc-val">{{ data.correct }}/{{ data.total }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Attempt history -->
+  {% if history|length > 1 %}
+  <div class="rp-history pop-in" style="--d:180ms">
+    <h3 class="rph2-title">Attempt History</h3>
+    <div class="rph-list">
+      {% for a in history|reverse %}
+      <div class="rph-item {% if loop.first %}rph-latest{% endif %}">
+        <span class="rph-date">{{ a.date }}</span>
+        <span class="rph-score-tag">{{ a.score }}/{{ a.total }}</span>
+        {% if a.mode == 'hard' %}<span class="rph-mode">🔥</span>{% endif %}
+        {% if a.hints > 0 %}<span class="rph-hints">💡×{{ a.hints }}</span>{% endif %}
+        {% if loop.first %}<span class="rph-new">Latest</span>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Question breakdown -->
+  <div class="rp-breakdown pop-in" style="--d:200ms">
+    <h3 class="rpb-title">Question Breakdown</h3>
+    {% for r in results %}
+    <div class="rpb-row {% if r.is_correct %}rpb-ok{% else %}rpb-err{% endif %}">
+      <div class="rpb-num">{{ r.num }}</div>
+      <div class="rpb-body">
+        <p class="rpb-q">{{ r.question }}</p>
+        {% if r.hint_used %}<p class="rpb-hint-note">💡 Hint was used</p>{% endif %}
+        {% if r.is_correct %}
+        <p class="rpba ans-ok">✓ {{ r.correct }} — {{ r.correct_text }}</p>
+        {% else %}
+        <p class="rpba ans-err">✗ You chose: {{ r.user_answer if r.user_answer else 'Nothing (timed out)' }}{% if r.user_answer %} — {{ r.user_answer_text }}{% endif %}</p>
+        <p class="rpba ans-ok">✓ Correct: {{ r.correct }} — {{ r.correct_text }}</p>
+        {% endif %}
+        <p class="rpb-expl">{{ r.explanation }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="rp-actions pop-in" style="--d:280ms">
+    <a href="/" class="cta-btn" data-nav>← Back to Home</a>
+    <a href="/quiz" class="btn-ghost" data-nav>Try Again</a>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const SCORE = {{ score }}, TOTAL = {{ total }};
+window.addEventListener('load', () => {
+  const pct = Math.round(SCORE/TOTAL*100);
+  setTimeout(() => {
+    const circ = 2*Math.PI*50;
+    const ring = document.getElementById('scoreRing');
+    ring.style.transition = 'stroke-dasharray 1.4s cubic-bezier(.4,0,.2,1)';
+    ring.setAttribute('stroke-dasharray', `${circ*pct/100} ${circ}`);
+    const bar = document.getElementById('scoreBar');
+    bar.style.transition = 'width 1.4s cubic-bezier(.4,0,.2,1)';
+    bar.style.width = pct + '%';
+    // Animate topic bars
+    document.querySelectorAll('.rpc-bar-fill').forEach(el => {
+      el.style.transition = 'width 1.2s cubic-bezier(.4,0,.2,1)';
+      el.style.width = el.dataset.pct + '%';
+    });
+  }, 250);
+
+  // Breakdown stagger
+  document.querySelectorAll('.rpb-row').forEach((el, i) => {
+    el.style.opacity = '0'; el.style.transform = 'translateY(10px)';
+    setTimeout(() => {
+      el.style.transition = 'opacity .4s ease, transform .4s ease';
+      el.style.opacity = '1'; el.style.transform = 'translateY(0)';
+    }, 350 + i * 80);
+  });
+
+  // Confetti for good scores
+  if (SCORE >= TOTAL * 0.6) launchConfetti(SCORE === TOTAL ? 80 : 40);
+});
+
+function launchConfetti(n) {
+  const wrap = document.getElementById('confettiWrap');
+  const colors = ['#4F8EF7','#F0A500','#34D399','#A78BFA','#F87171'];
+  for (let i = 0; i < n; i++) {
+    const p = document.createElement('div');
+    p.style.cssText = `position:absolute;top:-10px;left:${Math.random()*100}%;width:${5+Math.random()*7}px;height:${5+Math.random()*7}px;background:${colors[i%colors.length]};border-radius:${Math.random()>.5?'50%':'2px'};animation:confettiFall ${1.8+Math.random()*1.5}s linear ${Math.random()*1.5}s forwards;`;
+    wrap.appendChild(p);
+  }
+}
+</script>
+{% endblock %}

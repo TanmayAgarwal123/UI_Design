@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% set page_title = "Glossary" %}
+{% block content %}
+<div class="glossary-page">
+  <div class="gp-header pop-in" style="--d:0ms">
+    <div class="gp-eye">Reference</div>
+    <h1 class="gp-title">Finance Glossary</h1>
+    <p class="gp-sub">{{ terms|length }} investment banking terms, explained simply.</p>
+    <input type="text" id="glossSearch" class="gp-search" placeholder="Search terms...">
+  </div>
+  <div class="gp-grid" id="glossGrid">
+    {% for term, definition in terms.items()|sort %}
+    <div class="gp-card rev-card" data-term="{{ term|lower }}">
+      <h3 class="gpc-term">{{ term }}</h3>
+      <p class="gpc-def">{{ definition }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('glossSearch').addEventListener('input', function(){
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('.gp-card').forEach(card => {
+    const match = card.dataset.term.includes(q) || card.querySelector('.gpc-def').textContent.toLowerCase().includes(q);
+    card.style.display = match ? '' : 'none';
+  });
+});
+const ro = new IntersectionObserver(entries => entries.forEach(e => { if(e.isIntersecting){e.target.classList.add('in-view');ro.unobserve(e.target);} }), {threshold:.08});
+document.querySelectorAll('.rev-card').forEach((el,i) => { el.style.setProperty('--ri',i); ro.observe(el); });
+</script>
+{% endblock %}

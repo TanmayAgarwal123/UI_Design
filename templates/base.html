@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IB Academy{% if page_title %} · {{ page_title }}{% endif %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script>
+  /* Run before body renders — set theme immediately to prevent flash */
+  (function(){
+    var t;
+    try { t = localStorage.getItem('ib-theme'); } catch(e){}
+    document.documentElement.setAttribute('data-theme', (t==='light'||t==='dark') ? t : 'dark');
+  })();
+</script>
+</head>
+<body>
+
+<div class="pg-overlay"></div>
+
+<!-- Glossary Sidebar -->
+<div class="gloss-sidebar" id="glossSidebar">
+  <div class="gs-header">
+    <span class="gs-title">Glossary</span>
+    <button class="gs-close" id="glossClose">✕</button>
+  </div>
+  <div class="gs-term-name" id="glossTermName"></div>
+  <div class="gs-term-def" id="glossTermDef"></div>
+  <div class="gs-divider"></div>
+  <a href="/glossary" class="gs-all-link">View all {{ (glossary|length if glossary is defined else 0) }} terms →</a>
+</div>
+<div class="gloss-backdrop" id="glossBackdrop"></div>
+
+<!-- Keyboard shortcut toast -->
+<div class="kb-toast" id="kbToast"></div>
+
+<nav class="site-nav" id="siteNav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo" data-nav>
+      <span class="nl-ib">IB</span><span class="nl-rest">Academy</span>
+    </a>
+
+    {% if nav_progress is defined %}
+    <div class="nav-prog-wrap">
+      <div class="nav-prog-track">
+        <div class="nav-prog-fill" id="navProgFill" style="width:{{ nav_progress }}%"></div>
+      </div>
+      <span class="nav-prog-txt">{{ nav_label|default('') }}</span>
+    </div>
+    {% endif %}
+
+    <div class="nav-actions">
+      {% if glossary is defined %}
+      <a href="/glossary" class="nav-icon-btn" title="Glossary" data-nav>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Glossary
+      </a>
+      {% endif %}
+      <button class="nav-icon-btn" id="themeToggle" title="Toggle theme">
+        <span class="theme-sun">☀</span><span class="theme-moon">🌙</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<main id="mainContent">{% block content %}{% endblock %}</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- Inline glossary data for JS -->
+{% if glossary is defined %}
+<script>
+window.GLOSSARY = {{ glossary|tojson }};
+</script>
+{% else %}
+<script>window.GLOSSARY = {};</script>
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,605 @@
+{% extends "base.html" %}
+{% set page_title = lesson.title %}
+{% if lesson.progress %}
+  {% set parts = lesson.progress.split(' / ') %}
+  {% set nav_progress = (parts[0]|int / parts[1]|int * 100)|int %}
+  {% set nav_label = lesson.progress %}
+{% endif %}
+
+{% macro nav_btns(prev, nxt) %}
+<div class="l-nav">
+  {% if prev %}<a href="/learn/{{ prev }}" class="btn-ghost" data-nav>← Back</a>
+  {% else %}<a href="/" class="btn-ghost" data-nav>← Home</a>{% endif %}
+  {% if nxt == 'quiz' %}<a href="/quiz" class="cta-btn" data-nav>Take the Quiz →</a>
+  {% else %}<form method="POST" action="/learn/{{ lesson_num }}" style="margin:0"><button class="cta-btn">Next →</button></form>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro cont(nxt) %}
+<div class="l-nav jc-end">
+  {% if nxt == 'quiz' %}<a href="/quiz" class="cta-btn" data-nav>Take the Quiz →</a>
+  {% else %}<a href="/learn/{{ nxt }}" class="cta-btn" data-nav>Continue →</a>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro notes_widget() %}
+<div class="notes-widget" id="notesWidget">
+  <button class="notes-toggle" id="notesToggle">
+    <span class="nt-icon">📝</span>
+    <span id="ntLabel">Notes</span>
+  </button>
+  <div class="notes-panel" id="notesPanel" style="display:none">
+    <textarea class="notes-area" id="notesArea" placeholder="Jot down anything about this lesson…">{{ note }}</textarea>
+    <div class="notes-actions">
+      <span class="notes-status" id="noteStatus"></span>
+      <button class="notes-save" id="notesSave">Save Note</button>
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+{% block content %}
+<div class="learn-page">
+
+{% if lesson.progress %}
+{% set parts = lesson.progress.split(' / ') %}
+<div class="l-prog pop-in" style="--d:0ms">
+  <div class="lp-bar"><div class="lp-fill" style="width:{{ (parts[0]|int/parts[1]|int*100)|int }}%"></div></div>
+  <span class="lp-txt">{{ lesson.progress }}</span>
+</div>
+{% endif %}
+
+{# ═══ INFO ═══ #}
+{% if lesson.type == 'info' %}
+<div class="lc pop-in" style="--d:60ms">
+  <span class="lc-eye">Lesson {{ lesson_num }}</span>
+  <h1 class="lc-h">{{ lesson.title }}</h1>
+  <p class="lc-p">{{ lesson.body }}</p>
+  <div class="lc-callout"><span>💡</span><p>{{ lesson.callout }}</p></div>
+  {% if lesson.banks %}
+  <div class="banks-wrap mt-4">
+    <p class="banks-lbl">Major Investment Banks</p>
+    <div class="d-flex flex-wrap gap-2 mt-2">
+      {% for b in lesson.banks %}
+        {% if b.url %}
+          <a href="{{ b.url }}" target="_blank" rel="noopener" class="bank-chip">{{ b.name }}</a>
+        {% else %}
+          <span class="bank-chip gloss-trigger" data-term="{{ b }}">{{ b }}</span>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{{ notes_widget() }}
+{{ nav_btns(lesson_num-1 if lesson_num>1 else None, lesson.get('next',lesson_num+1)) }}
+
+{# ═══ TWO_COL ═══ #}
+{% elif lesson.type == 'two_col' %}
+<div class="lc pop-in" style="--d:60ms">
+  <span class="lc-eye">Advisory Function</span>
+  <h1 class="lc-h">{{ lesson.title }}</h1>
+  <div class="tc-grid mt-4">
+    <div class="tc-panel tc-blue">
+      <div class="tc-badge tb-blue">Buy-Side</div>
+      <h3 class="tc-h">{{ lesson.left.heading }}</h3>
+      <p class="tc-p">{{ lesson.left.body }}</p>
+      <div class="tc-ex">{{ lesson.left.example }}</div>
+      <p class="tc-q">{{ lesson.left.quote }}</p>
+    </div>
+    <div class="tc-panel tc-gold">
+      <div class="tc-badge tb-gold">Sell-Side</div>
+      <h3 class="tc-h tc-h-gold">{{ lesson.right.heading }}</h3>
+      <p class="tc-p">{{ lesson.right.body }}</p>
+      <div class="tc-ex">{{ lesson.right.example }}</div>
+      <p class="tc-q">{{ lesson.right.quote }}</p>
+    </div>
+  </div>
+  <div class="lc-callout mt-3"><span>💡</span><p><strong>Remember:</strong> The same bank can advise on both sides — just never in the same deal. Chinese Walls prevent information sharing between teams.</p></div>
+</div>
+{{ notes_widget() }}
+{{ nav_btns(lesson_num-1, lesson.get('next',lesson_num+1)) }}
+
+{# ═══ INTERACTIVE SORT — drag & drop ═══ #}
+{% elif lesson.type == 'interactive_sort' %}
+<div class="lc pop-in" style="--d:60ms">
+  <span class="act-tag">⚡ Interactive · Drag & Drop</span>
+  <h1 class="lc-h">{{ lesson.title }}</h1>
+  <p class="lc-p">{{ lesson.instruction|safe }}</p>
+
+  {% if not feedback %}
+  <form method="POST" action="/learn/{{ lesson_num }}" id="sortform">
+    <div class="dnd-sort-layout mt-4">
+      <!-- Cards to sort -->
+      <div class="dnd-pool" id="dndPool">
+        <div class="dnd-pool-label">DEALS</div>
+        {% for deal in lesson.deals %}
+        <div class="dnd-item" draggable="true" data-id="{{ deal.id }}" id="di-{{ deal.id }}">
+          <span class="dnd-grip">⠿</span>
+          <span class="dnd-item-text">{{ deal.text|safe }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <!-- Drop zones -->
+      <div class="dnd-zones">
+        <div class="dnd-zone" data-side="buy" id="zone-buy">
+          <div class="dz-label dz-buy">↗ Buy-Side</div>
+          <div class="dz-subtitle">Advising the acquirer</div>
+          <div class="dz-items" id="zone-buy-items"></div>
+          <div class="dz-placeholder">Drop deals here</div>
+        </div>
+        <div class="dnd-zone" data-side="sell" id="zone-sell">
+          <div class="dz-label dz-sell">↘ Sell-Side</div>
+          <div class="dz-subtitle">Advising the seller</div>
+          <div class="dz-items" id="zone-sell-items"></div>
+          <div class="dz-placeholder">Drop deals here</div>
+        </div>
+      </div>
+    </div>
+    <!-- Hidden inputs filled by JS -->
+    {% for deal in lesson.deals %}
+    <input type="hidden" name="{{ deal.id }}" id="hi-{{ deal.id }}" value="{{ prev_answers.get(deal.id,'') if prev_answers else '' }}">
+    {% endfor %}
+    <div class="l-nav mt-4">
+      <a href="/learn/{{ lesson_num-1 }}" class="btn-ghost" data-nav>← Back</a>
+      <button type="submit" class="cta-btn" id="sortSubmit" disabled>Submit Answers →</button>
+    </div>
+  </form>
+
+  {% else %}
+  <div class="fb-strip {% if feedback.all_correct %}fbs-ok{% else %}fbs-partial{% endif %} pop-in" style="--d:0ms">
+    {{ '✓ All correct!' if feedback.all_correct else 'Here\'s how you did' }}
+  </div>
+  <div class="sr-list mt-3">
+    {% for deal in lesson.deals %}{% set r=feedback.results[deal.id] %}
+    <div class="srr {% if r.ok %}srr-ok{% else %}srr-err{% endif %}">
+      <div class="srr-top">
+        <p class="sort-deal mb-0">{{ deal.text|safe }}</p>
+        <span class="res-pill {% if r.ok %}rp-ok{% else %}rp-err{% endif %}">{% if r.ok %}✓ Correct{% else %}✗ Wrong{% endif %}</span>
+      </div>
+      {% if not r.ok %}<p class="srr-fix"><span class="text-r">You: {{ 'Buy-Side' if r.user=='buy' else 'Sell-Side' }}</span> → <span class="text-g">Correct: {{ 'Buy-Side' if r.correct=='buy' else 'Sell-Side' }}</span></p>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  <div class="lc-callout mt-4"><span>💡</span><p>Gaining ownership → Buy-Side. Giving up ownership → Sell-Side.</p></div>
+  {{ cont(lesson.get('next',lesson_num+1)) }}
+  {% endif %}
+</div>
+
+{# ═══ ANSWERS REVEAL ═══ #}
+{% elif lesson.type == 'answers_reveal' %}
+<div class="lc pop-in" style="--d:60ms">
+  <span class="lc-eye">Answers</span>
+  <h1 class="lc-h">{{ lesson.title }}</h1>
+  <div class="tc-grid mt-4">
+    <div class="ans-col ac-buy"><h5 class="ac-h">↗ Buy-Side</h5>{% for item in lesson.buy_side %}<div class="ac-row">✓ {{ item }}</div>{% endfor %}</div>
+    <div class="ans-col ac-sell"><h5 class="ac-h ac-h-sell">↘ Sell-Side</h5>{% for item in lesson.sell_side %}<div class="ac-row">✓ {{ item }}</div>{% endfor %}</div>
+  </div>
+  <div class="insight-box mt-4"><span class="ib-tag">Key Insight</span><p>{{ lesson.key_insight }}</p></div>
+</div>
+{{ nav_btns(lesson_num-1, lesson.get('next',lesson_num+1)) }}
+
+{# ═══ IPO OVERVIEW ═══ #}
+{% elif lesson.type == 'ipo_overview' %}
+<div class="lc pop-in" style="--d:60ms">
+  <span class="lc-eye">Capital Markets</span>
+  <h1 class="lc-h">{{ lesson.title }}</h1>
+  <p class="lc-p">{{ lesson.instruction }}</p>
+  <div class="ipo-grid mt-4">
+    {% for step in lesson.steps %}
+    <a href="/learn/{{ step.link }}" class="ipo-card" style="--i:{{ loop.index0 }}" data-nav>
+      <div class="ipo-num">{{ step.num }}</div>
+      <p class="ipo-lbl">{{ step.label }}</p>
+      <span class="ipo-cta">Explore →</span>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{{ notes_widget() }}
+<div class="l-nav">
+  <a href="/learn/{{ lesson_num-1 }}" class="btn-ghost" data-nav>← Back</a>
+  <form method="POST" action="/learn/{{ lesson_num }}" style="margin:0"><button class="cta-btn">Next →</button></form>
+</div>
+
+{# ═══ STEP DETAIL ═══ #}
+{% elif lesson.type == 'step_detail' %}
+<div class="lc pop-in" style="--d:60ms">
+  <div class="step-hdr">
+    <div class="step-bub">{{ lesson.step_num }}</div>
+    <div><span class="lc-eye">IPO Step {{ lesson.step_num }}</span><h1 class="lc-h mb-0">{{ lesson.step_title }}</h1></div>
+  </div>
+  <p class="lc-p mt-3">{{ lesson.body }}</p>
+  <div class="rows mt-3">
+    {% for row in lesson.rows %}<div class="row-item" style="--i:{{ loop.index0 }}"><span class="ri-term">{{ row.term }}</span><span class="ri-desc">{{ row.desc }}</span></div>{% endfor %}
+  </div>
+  {% if lesson.key_point %}<div class="kp-box kp-{% if lesson.key_point_color=='green' %}g{% else %}b{% endif %} mt-4">★ <strong>Key point:</strong> {{ lesson.key_point }}</div>{% endif %}
+</div>
+{{ notes_widget() }}
+<div class="l-nav">
+  <a href="/learn/{{ lesson.back_to }}" class="btn-ghost" data-nav>← IPO Overview</a>
+  <a href="/learn/{{ lesson.next }}" class="cta-btn" data-nav>Next →</a>
+</div>
+
+{# ═══ STEP DETAIL FLOW ═══ #}
+{% elif lesson.type == 'step_detail_flow' %}
+<div class="lc pop-in" style="--d:60ms">
+  <div class="step-hdr">
+    <div class="step-bub">{{ lesson.step_num }}</div>
+    <div><span class="lc-eye">IPO Step {{ lesson.step_num }}</span><h1 class="lc-h mb-0">{{ lesson.step_title }}</h1></div>
+  </div>
+  <p class="lc-p mt-3">{{ lesson.body }}</p>
+  <div class="flow-diag mt-4">
+    {% for node in lesson.flow %}
+    <div class="fd-node {% if node.highlight %}fd-hl{% endif %}" style="--i:{{ loop.index0 }}"><div class="fdn-lbl">{{ node.label }}</div>{% if node.sub %}<div class="fdn-sub">{{ node.sub }}</div>{% endif %}</div>
+    {% if not loop.last %}<div class="fd-arr">→</div>{% endif %}
+    {% endfor %}
+  </div>
+  <div class="lc-callout lc-gold mt-4"><span>⚠</span><p>{{ lesson.callout }}</p></div>
+</div>
+{{ notes_widget() }}
+<div class="l-nav">
+  <a href="/learn/{{ lesson.back_to }}" class="btn-ghost" data-nav>← IPO Overview</a>
+  <a href="/learn/{{ lesson.next }}" class="cta-btn" data-nav>Next →</a>
+</div>
+
+{# ═══ INTERACTIVE SEQUENCE — drag & drop ═══ #}
+{% elif lesson.type == 'interactive_sequence' %}
+<div class="lc pop-in" style="--d:60ms">
+  <span class="act-tag">⚡ Interactive · Drag to Order</span>
+  <h1 class="lc-h">{{ lesson.title }}</h1>
+  <p class="lc-p">{{ lesson.instruction }}</p>
+  {% if not feedback %}
+  <form method="POST" action="/learn/{{ lesson_num }}" id="seqform">
+    <div class="dnd-order-wrap mt-4">
+      <div class="dnd-order-pool" id="seqPool">
+        <div class="dop-label">DRAG TO REORDER</div>
+        {% for step in lesson.steps %}
+        <div class="dno-card" draggable="true" data-id="{{ step.id }}" id="dno-{{ step.id }}">
+          <span class="dnd-grip">⠿</span>
+          <div><p class="sc-lbl">{{ step.label }}</p><p class="sc-desc">{{ step.desc }}</p></div>
+          <span class="dno-pos" id="pos-{{ step.id }}">?</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% for step in lesson.steps %}
+    <input type="hidden" name="{{ step.id }}" id="seq-hi-{{ step.id }}" value="">
+    {% endfor %}
+    <div class="l-nav mt-3">
+      <a href="/learn/{{ lesson_num-1 }}" class="btn-ghost" data-nav>← Back</a>
+      <button type="submit" class="cta-btn" id="seqSubmit" disabled>Reveal Order →</button>
+    </div>
+  </form>
+  {% else %}
+  <div class="fb-strip {% if feedback.all_correct %}fbs-ok{% else %}fbs-partial{% endif %} pop-in" style="--d:0ms">{{ '✓ Perfect order!' if feedback.all_correct else 'Correct sequence below' }}</div>
+  <div class="seq-res mt-3">
+    {% for step in lesson.steps %}{% set r=feedback.results[step.id] %}
+    <div class="sqr {% if r.ok %}sqr-ok{% else %}sqr-err{% endif %}">
+      <div class="sqr-pos {% if r.ok %}sqrp-ok{% else %}sqrp-err{% endif %}">{{ r.correct_pos }}</div>
+      <div class="flex-grow-1"><p class="sc-lbl mb-0">{{ step.label }}</p>
+        {% if not r.ok %}<p class="srr-fix small">You placed {{ r.user_pos }} → Correct: {{ r.correct_pos }}</p>{% endif %}
+      </div>
+      <span class="res-pill {% if r.ok %}rp-ok{% else %}rp-err{% endif %}">{% if r.ok %}✓{% else %}✗{% endif %}</span>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="insight-box mt-4"><span class="ib-tag">Remember</span><p>Can't price what you don't have, can't sell what isn't priced, can't go public until shares are sold.</p></div>
+  {{ cont(lesson.get('next',lesson_num+1)) }}
+  {% endif %}
+</div>
+
+{# ═══ SEQUENCE ANSWER ═══ #}
+{% elif lesson.type == 'sequence_answer' %}
+<div class="lc pop-in" style="--d:60ms">
+  <span class="lc-eye">Correct Order</span><h1 class="lc-h">{{ lesson.title }}</h1>
+  <div class="sa-flow mt-4">
+    {% for step in lesson.steps %}<div class="sa-node" style="--i:{{ loop.index0 }}"><div class="sa-num">{{ step.num }}</div><div class="sa-lbl">{{ step.label }}</div><div class="sa-desc">{{ step.desc }}</div></div>{% if not loop.last %}<div class="fd-arr">→</div>{% endif %}{% endfor %}
+  </div>
+  <div class="insight-box mt-4"><span class="ib-tag">Key Insight</span><p>{{ lesson.key_insight }}</p></div>
+</div>
+{{ nav_btns(lesson_num-1, lesson.get('next',lesson_num+1)) }}
+
+{# ═══ ORG CHART ═══ #}
+{% elif lesson.type == 'org_chart' %}
+<div class="lc pop-in" style="--d:60ms">
+  <span class="lc-eye">Team Structure</span><h1 class="lc-h">{{ lesson.title }}</h1>
+  <div class="org mt-4">
+    {% for role in lesson.roles %}
+    <div class="org-row" style="--indent:{{ (role.level-1)*28 }}px; --i:{{ loop.index0 }}">
+      <div class="org-dot" style="background:{{ ['#4F8EF7','#60A5FA','#93C5FD','#BFDBFE'][role.level-1] }}"></div>
+      <div class="flex-grow-1"><span class="org-title gloss-trigger" data-term="{{ role.title.split('(')[0].strip() }}">{{ role.title }}</span><span class="org-sep">—</span><span class="org-desc">{{ role.desc }}</span></div>
+      <span class="org-yrs">{{ role.years }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{{ notes_widget() }}
+{{ nav_btns(lesson_num-1, lesson.get('next',lesson_num+1)) }}
+
+{# ═══ INTERACTIVE MATCH ═══ #}
+{% elif lesson.type == 'interactive_match' %}
+<div class="lc pop-in" style="--d:60ms">
+  <span class="act-tag">⚡ Interactive · Match Roles</span>
+  <h1 class="lc-h">{{ lesson.title }}</h1>
+  <p class="lc-p">{{ lesson.instruction }}</p>
+  {% if not feedback %}
+  <form method="POST" action="/learn/{{ lesson_num }}">
+    <div class="match-list mt-4">
+      {% for role in lesson.roles %}
+      <div class="match-row" style="--i:{{ loop.index0 }}">
+        <div class="mr-role">{{ role }}</div>
+        <select class="match-sel" name="{{ role }}" required>
+          <option value="" disabled {% if not prev_answers or not prev_answers.get(role) %}selected{% endif %}>Select description…</option>
+          {% for desc in lesson.descriptions %}<option value="{{ desc.id }}" {% if prev_answers and prev_answers.get(role)==desc.id %}selected{% endif %}>{{ desc.text }}</option>{% endfor %}
+        </select>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="l-nav"><a href="/learn/{{ lesson_num-1 }}" class="btn-ghost" data-nav>← Back</a><button type="submit" class="cta-btn">Check Answers →</button></div>
+  </form>
+  {% else %}
+  <div class="fb-strip {% if feedback.all_correct %}fbs-ok{% else %}fbs-partial{% endif %} pop-in" style="--d:0ms">{{ '✓ All correct!' if feedback.all_correct else 'Here\'s how you did' }}</div>
+  <div class="match-res mt-3">
+    {% for role in lesson.roles %}{% set r=feedback.results[role] %}
+    <div class="mrr {% if r.ok %}mrr-ok{% else %}mrr-err{% endif %}">
+      <div class="d-flex justify-content-between align-items-center mb-1"><span class="mr-role-lbl">{{ role }}</span><span class="res-pill {% if r.ok %}rp-ok{% else %}rp-err{% endif %}">{% if r.ok %}✓ Correct{% else %}✗ Wrong{% endif %}</span></div>
+      {% if r.ok %}<p class="text-g small mb-0">{{ r.correct_text }}</p>{% else %}<p class="text-r small mb-0">"{{ r.user_text }}"</p><p class="text-g small mb-0">✓ "{{ r.correct_text }}"</p>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {{ cont(lesson.get('next',lesson_num+1)) }}
+  {% endif %}
+</div>
+
+{# ═══ PROCESS ═══ #}
+{% elif lesson.type == 'process' %}
+<div class="lc pop-in" style="--d:60ms">
+  <span class="lc-eye">Deal Process</span><h1 class="lc-h">{{ lesson.title }}</h1>
+  <div class="proc-flow mt-4">
+    {% for step in lesson.steps %}<div class="proc-node" style="--i:{{ loop.index0 }}"><div class="pn-num">{{ step.num }}</div><div class="pn-lbl">{{ step.label }}</div><div class="pn-desc">{{ step.desc }}</div></div>{% if not loop.last %}<div class="fd-arr pra">→</div>{% endif %}{% endfor %}
+  </div>
+</div>
+{{ notes_widget() }}
+{{ nav_btns(lesson_num-1, lesson.get('next',lesson_num+1)) }}
+
+{# ═══ INTERACTIVE DEAL — drag & drop ═══ #}
+{% elif lesson.type == 'interactive_deal' %}
+<div class="lc pop-in" style="--d:60ms">
+  <span class="act-tag">⚡ Interactive · Drag to Order</span>
+  <h1 class="lc-h">{{ lesson.title }}</h1>
+  <p class="lc-p">{{ lesson.instruction }}</p>
+  {% if not feedback %}
+  <form method="POST" action="/learn/{{ lesson_num }}" id="dealform">
+    <div class="dnd-order-wrap mt-4">
+      <div class="dnd-order-pool" id="dealPool">
+        <div class="dop-label">DRAG TO REORDER</div>
+        {% for stage in lesson.stages %}
+        <div class="dno-card" draggable="true" data-id="{{ stage.id }}" id="dno-{{ stage.id }}">
+          <span class="dnd-grip">⠿</span>
+          <div><p class="sc-lbl">{{ stage.label }}</p><p class="sc-desc">{{ stage.desc }}</p></div>
+          <span class="dno-pos" id="pos-{{ stage.id }}">?</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% for stage in lesson.stages %}<input type="hidden" name="{{ stage.id }}" id="deal-hi-{{ stage.id }}" value="">{% endfor %}
+    <div class="l-nav mt-3">
+      <a href="/learn/{{ lesson_num-1 }}" class="btn-ghost" data-nav>← Back</a>
+      <button type="submit" class="cta-btn" id="dealSubmit" disabled>Check Order →</button>
+    </div>
+  </form>
+  {% else %}
+  <div class="fb-strip {% if feedback.all_correct %}fbs-ok{% else %}fbs-partial{% endif %} pop-in" style="--d:0ms">{{ '✓ Perfect!' if feedback.all_correct else 'Correct order below' }}</div>
+  <div class="seq-res mt-3">
+    {% for stage in lesson.stages %}{% set r=feedback.results[stage.id] %}
+    <div class="sqr {% if r.ok %}sqr-ok{% else %}sqr-err{% endif %}">
+      <div class="sqr-pos {% if r.ok %}sqrp-ok{% else %}sqrp-err{% endif %}">{{ r.correct_pos }}</div>
+      <div class="flex-grow-1"><p class="sc-lbl mb-0">{{ stage.label }}</p>{% if not r.ok %}<p class="srr-fix small">You: {{ r.user_pos }} → Correct: {{ r.correct_pos }}</p>{% endif %}</div>
+      <span class="res-pill {% if r.ok %}rp-ok{% else %}rp-err{% endif %}">{% if r.ok %}✓{% else %}✗{% endif %}</span>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="insight-box mt-4"><span class="ib-tag">Correct Order</span><p>Pitch → Due Diligence → Negotiation → Execution</p></div>
+  {{ cont(lesson.get('next',lesson_num+1)) }}
+  {% endif %}
+</div>
+
+{# ═══ TAKEAWAYS ═══ #}
+{% elif lesson.type == 'takeaways' %}
+<div class="lc pop-in" style="--d:60ms">
+  <span class="lc-eye">Summary</span><h1 class="lc-h">{{ lesson.title }}</h1>
+  <div class="ta-list mt-4">
+    {% for point in lesson.points %}<div class="ta-item" style="--i:{{ loop.index0 }}"><div class="ta-n">{{ loop.index }}</div><p class="ta-p">{{ point }}</p></div>{% endfor %}
+  </div>
+  <div class="l-nav mt-5">
+    <a href="/learn/{{ lesson_num-1 }}" class="btn-ghost" data-nav>← Review</a>
+    <form method="POST" action="/learn/{{ lesson_num }}" style="margin:0"><button type="submit" class="cta-btn cta-lg">Take the Quiz →</button></form>
+  </div>
+</div>
+{% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const LESSON_NUM = {{ lesson_num }};
+
+// ── Notes widget ─────────────────────────────────────────────────────
+const notesToggle = document.getElementById('notesToggle');
+const notesPanel = document.getElementById('notesPanel');
+const notesSave = document.getElementById('notesSave');
+const noteStatus = document.getElementById('noteStatus');
+const notesArea = document.getElementById('notesArea');
+
+if (notesToggle) {
+  const hasNote = notesArea && notesArea.value.trim().length > 0;
+  if (hasNote) document.getElementById('ntLabel').textContent = 'Notes ●';
+
+  notesToggle.addEventListener('click', () => {
+    const open = notesPanel.style.display === 'none';
+    notesPanel.style.display = open ? 'block' : 'none';
+    notesToggle.classList.toggle('nt-open', open);
+  });
+
+  notesSave?.addEventListener('click', () => {
+    fetch('/api/note', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({lesson: LESSON_NUM, text: notesArea.value})
+    }).then(() => {
+      noteStatus.textContent = '✓ Saved';
+      noteStatus.style.color = '#34D399';
+      document.getElementById('ntLabel').textContent = 'Notes ●';
+      setTimeout(() => { noteStatus.textContent = ''; }, 2500);
+    });
+  });
+
+  // Auto-save on typing (debounced)
+  let saveTimeout;
+  notesArea?.addEventListener('input', () => {
+    noteStatus.textContent = 'Unsaved…';
+    noteStatus.style.color = 'rgba(255,255,255,.3)';
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => notesSave?.click(), 1500);
+  });
+}
+
+// ── Drag & Drop: Sort (Buy/Sell) ──────────────────────────────────────
+const pool = document.getElementById('dndPool');
+if (pool) {
+  let dragId = null;
+  const zoneBuy = document.getElementById('zone-buy-items');
+  const zoneSell = document.getElementById('zone-sell-items');
+
+  // Restore previous answers
+  document.querySelectorAll('.dnd-item').forEach(item => {
+    const id = item.dataset.id;
+    const hi = document.getElementById('hi-' + id);
+    if (hi && hi.value === 'buy') zoneBuy.appendChild(item);
+    else if (hi && hi.value === 'sell') zoneSell.appendChild(item);
+  });
+  updateSortSubmit();
+
+  document.querySelectorAll('.dnd-item').forEach(item => {
+    item.addEventListener('dragstart', e => {
+      dragId = item.dataset.id;
+      item.classList.add('dnd-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dnd-dragging');
+      dragId = null;
+      updateSortSubmit();
+    });
+  });
+
+  [document.getElementById('zone-buy'), document.getElementById('zone-sell'), pool].forEach(zone => {
+    if (!zone) return;
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dz-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dz-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.classList.remove('dz-over');
+      if (!dragId) return;
+      const item = document.getElementById('di-' + dragId);
+      const side = zone.dataset.side;
+      const target = zone.querySelector('.dz-items') || zone;
+      target.appendChild(item);
+      const hi = document.getElementById('hi-' + dragId);
+      if (hi) hi.value = side || '';
+      updateSortSubmit();
+    });
+  });
+
+  function updateSortSubmit() {
+    const items = document.querySelectorAll('.dnd-item');
+    const allPlaced = [...items].every(item => {
+      const id = item.dataset.id;
+      const hi = document.getElementById('hi-' + id);
+      return hi && (hi.value === 'buy' || hi.value === 'sell');
+    });
+    const btn = document.getElementById('sortSubmit');
+    if (btn) btn.disabled = !allPlaced;
+    // Update placeholder visibility
+    [document.getElementById('zone-buy'), document.getElementById('zone-sell')].forEach(z => {
+      if (!z) return;
+      const ph = z.querySelector('.dz-placeholder');
+      const items = z.querySelector('.dz-items');
+      if (ph && items) ph.style.display = items.children.length > 0 ? 'none' : 'block';
+    });
+  }
+}
+
+// ── Drag & Drop: Sequence/Deal (reorder) ──────────────────────────────
+['seqPool','dealPool'].forEach(poolId => {
+  const pool = document.getElementById(poolId);
+  if (!pool) return;
+
+  const formId = poolId === 'seqPool' ? 'seqform' : 'dealform';
+  const submitId = poolId === 'seqPool' ? 'seqSubmit' : 'dealSubmit';
+  const hiPrefix = poolId === 'seqPool' ? 'seq-hi-' : 'deal-hi-';
+
+  let dragged = null;
+
+  pool.addEventListener('dragstart', e => {
+    dragged = e.target.closest('.dno-card');
+    if (dragged) { dragged.classList.add('dnd-dragging'); e.dataTransfer.effectAllowed='move'; }
+  });
+  pool.addEventListener('dragend', () => {
+    if (dragged) { dragged.classList.remove('dnd-dragging'); dragged = null; }
+    updateOrderPositions(pool, hiPrefix, submitId);
+  });
+  pool.addEventListener('dragover', e => {
+    e.preventDefault();
+    const afterEl = getDragAfterEl(pool, e.clientY);
+    if (afterEl) pool.insertBefore(dragged, afterEl);
+    else pool.appendChild(dragged);
+  });
+
+  function getDragAfterEl(container, y) {
+    const els = [...container.querySelectorAll('.dno-card:not(.dnd-dragging)')];
+    return els.reduce((closest, child) => {
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height / 2;
+      if (offset < 0 && offset > closest.offset) return {offset, element: child};
+      return closest;
+    }, {offset: Number.NEGATIVE_INFINITY}).element;
+  }
+});
+
+function updateOrderPositions(pool, hiPrefix, submitId) {
+  const cards = [...pool.querySelectorAll('.dno-card')];
+  cards.forEach((card, i) => {
+    const id = card.dataset.id;
+    const pos = i + 1;
+    const posEl = document.getElementById('pos-' + id);
+    const hi = document.getElementById(hiPrefix + id);
+    if (posEl) { posEl.textContent = pos; posEl.classList.add('pos-set'); }
+    if (hi) hi.value = pos;
+  });
+  const btn = document.getElementById(submitId);
+  if (btn) btn.disabled = false;
+}
+
+// ── Glossary triggers ─────────────────────────────────────────────────
+document.querySelectorAll('.gloss-trigger').forEach(el => {
+  el.style.cursor = 'help';
+  el.style.textDecoration = 'underline dotted';
+});
+
+// ── Stagger feedback items ────────────────────────────────────────────
+$('.srr,.sqr,.mrr').each(function(i){
+  $(this).css({opacity:0,transform:'translateY(8px)'});
+  setTimeout(()=>$(this).css({transition:'opacity .3s ease,transform .3s ease',opacity:1,transform:'translateY(0)'}), 80+i*55);
+});
+
+// ── Keyboard nav ─────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if ((e.key === 'ArrowRight' || e.key === 'Enter') && e.ctrlKey) {
+    const btn = document.querySelector('.cta-btn');
+    if (btn) btn.click();
+  }
+});
+</script>
+{% endblock %}

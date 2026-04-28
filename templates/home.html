@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% set page_title = "What is Investment Banking?" %}
+{% block content %}
+
+<canvas id="hero-canvas"></canvas>
+
+<section class="hero">
+  <div class="hero-ticker">
+    <div class="ticker-inner">
+      {% for s,d in [('GS +2.4%','up'),('JPM -0.8%','dn'),('MS +1.1%','up'),('BX +3.2%','up'),('BAC -0.3%','dn'),('C +0.9%','up'),('EVR +4.1%','up'),('LAZ -1.2%','dn'),('GS +2.4%','up'),('JPM -0.8%','dn'),('MS +1.1%','up'),('BX +3.2%','up'),('BAC -0.3%','dn'),('C +0.9%','up'),('EVR +4.1%','up'),('LAZ -1.2%','dn')] %}
+      <span class="tick-s {{ d }}">{{ s }}</span>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="hero-body">
+    <div class="hero-label"><span class="label-dot"></span>Finance · Career Literacy · Spring 2026</div>
+    <h1 class="hero-title">What is<br><span class="ht-grad">Investment</span><br>Banking?</h1>
+    <p class="hero-desc">Master advisory, capital markets, deal flow, and team structure — built for engineers entering finance.</p>
+
+    <div class="hero-btns">
+      {% if next_lesson and completed > 0 %}
+      <a href="/learn/{{ next_lesson }}" class="cta-btn" data-nav>
+        Continue → Lesson {{ next_lesson }}
+        <span class="cta-pct">{{ pct }}% done</span>
+      </a>
+      {% else %}
+      <form action="/start" method="POST" style="margin:0">
+        <button type="submit" class="cta-btn">
+          Start Learning
+          <svg class="btn-arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+      {% endif %}
+      <a href="/quiz" class="btn-ghost" data-nav>Take Quiz</a>
+    </div>
+
+    <!-- Progress dashboard if started -->
+    {% if completed > 0 %}
+    <div class="hero-dashboard">
+      <div class="hd-title">YOUR PROGRESS</div>
+      <div class="hd-stats">
+        <div class="hd-stat">
+          <div class="hd-ring-wrap">
+            <svg width="64" height="64" viewBox="0 0 42 42">
+              <circle cx="21" cy="21" r="16" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="3"/>
+              <circle cx="21" cy="21" r="16" fill="none" stroke="#4F8EF7" stroke-width="3"
+                stroke-dasharray="{{ (pct * 100.5 / 100)|int }} 100.5"
+                stroke-dashoffset="25" stroke-linecap="round"/>
+            </svg>
+            <span class="hd-ring-num">{{ pct }}%</span>
+          </div>
+          <span class="hd-lbl">{{ completed }}/{{ total }} Lessons</span>
+        </div>
+        {% if best_score is not none %}
+        <div class="hd-stat">
+          <div class="hd-big">{{ best_score }}/{{ total_quiz }}</div>
+          <span class="hd-lbl">Best Score</span>
+        </div>
+        {% endif %}
+        {% if quiz_history %}
+        <div class="hd-stat">
+          <div class="hd-big">{{ quiz_history|length }}</div>
+          <span class="hd-lbl">Quiz Attempt{{ 's' if quiz_history|length != 1 else '' }}</span>
+        </div>
+        {% endif %}
+      </div>
+      <!-- Lesson progress dots -->
+      <div class="hd-dots">
+        {% for i in range(1, total+1) %}
+        <a href="/learn/{{ i }}" class="hd-dot {% if i|string in session.get('page_visits', {}) %}hd-dot-done{% endif %}" title="Lesson {{ i }}" data-nav></a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="hero-stats">
+      <div class="hs-item"><span class="hs-num" data-to="10">0</span><span class="hs-lbl">Lessons</span></div>
+      <div class="hs-div"></div>
+      <div class="hs-item"><span class="hs-num" data-to="5">0</span><span class="hs-lbl">Quiz Questions</span></div>
+      <div class="hs-div"></div>
+      <div class="hs-item"><span class="hs-num" data-to="10">0</span><span class="hs-lbl">Minutes</span></div>
+      <div class="hs-div"></div>
+      <div class="hs-item"><span class="hs-num" data-to="4">0</span><span class="hs-lbl">Interactive Activities</span></div>
+    </div>
+  </div>
+
+  <div class="hero-float-cards">
+    <div class="hfc hfc-1"><div class="hfc-icon" style="color:#4F8EF7">$</div><div><div class="hfc-t">M&A Advisory</div><div class="hfc-s">Buy-side & Sell-side</div></div></div>
+    <div class="hfc hfc-2"><div class="hfc-icon" style="color:#F0A500">↑</div><div><div class="hfc-t">IPO Process</div><div class="hfc-s">4-step breakdown</div></div></div>
+    <div class="hfc hfc-3"><div class="hfc-icon" style="color:#A78BFA">⬡</div><div><div class="hfc-t">Team Structure</div><div class="hfc-s">Analyst → MD</div></div></div>
+  </div>
+</section>
+
+<section class="curriculum">
+  <div class="curr-container">
+    <div class="curr-header"><div class="curr-eye">Curriculum</div><h2 class="curr-h">What you'll learn</h2></div>
+    <div class="curr-grid">
+      {% for color,icon,title,desc in [('#4F8EF7','$','What is Investment Banking?','The role of banks and why they matter.'),('#F0A500','↔','M&A Advisory','Buy-side vs. sell-side with real deals.'),('#34D399','↑','Capital Markets & IPOs','The full 4-step IPO process.'),('#A78BFA','⬡','Team Structure','Analyst to MD — who does what.'),('#22D3EE','⇀','Deal Process','Pitch → Due Diligence → Execution.'),('#F87171','★','Quiz','5 questions to test everything.')] %}
+      <div class="cc-card rev-card" style="--ca:{{ color }}">
+        <div class="cc-icon" style="color:{{ color }};background:{{ color }}1a">{{ icon }}</div>
+        <h3 class="cc-title">{{ title }}</h3>
+        <p class="cc-desc">{{ desc }}</p>
+        <div class="cc-line" style="background:{{ color }}"></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+{% block scripts %}
+<script>
+(function(){
+  const c=document.getElementById('hero-canvas'),ctx=c.getContext('2d');
+  let w,h,pts=[],mouse={x:-999,y:-999};
+  function resize(){w=c.width=window.innerWidth;h=c.height=c.parentElement.offsetHeight||window.innerHeight;}
+  class Pt{
+    constructor(){this.reset(true);}
+    reset(init){this.x=Math.random()*w;this.y=init?Math.random()*h:-10;this.vx=(Math.random()-.5)*.25;this.vy=(Math.random()-.5)*.25;this.r=Math.random()*1.2+.4;this.a=Math.random()*.3+.06;this.c=['#4F8EF7','#F0A500','#34D399','#A78BFA'][Math.floor(Math.random()*4)];}
+    move(){const dx=this.x-mouse.x,dy=this.y-mouse.y,d=Math.sqrt(dx*dx+dy*dy);if(d<100){this.vx+=(dx/d)*.3;this.vy+=(dy/d)*.3;}this.vx*=.98;this.vy*=.98;this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>w)this.vx*=-1;if(this.y<0||this.y>h)this.vy*=-1;}
+    draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle=this.c;ctx.globalAlpha=this.a;ctx.fill();}
+  }
+  function init(){resize();pts=[];for(let i=0;i<90;i++)pts.push(new Pt());}
+  function frame(){ctx.clearRect(0,0,w,h);for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<110){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle='rgba(79,142,247,.06)';ctx.lineWidth=.5;ctx.globalAlpha=(1-d/110)*.4;ctx.stroke();}}pts.forEach(p=>{p.move();p.draw();});ctx.globalAlpha=1;requestAnimationFrame(frame);}
+  window.addEventListener('resize',init);window.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
+  init();frame();
+})();
+
+// Counters
+document.querySelectorAll('.hs-num').forEach(el=>{
+  const t=+el.dataset.to,iv=setInterval(()=>{el._n=(el._n||0)+t/35;el.textContent=Math.min(Math.round(el._n),t);if(el._n>=t)clearInterval(iv);},28);
+});
+
+// Scroll reveal
+const ro=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in-view');ro.unobserve(e.target);}}),{threshold:.1});
+document.querySelectorAll('.rev-card').forEach((el,i)=>{el.style.setProperty('--ri',i);ro.observe(el);});
+</script>
+{% endblock %}
